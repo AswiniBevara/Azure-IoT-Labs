@@ -1,0 +1,61 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the IoT Hub"
+            }
+        },
+        "sku_name": {
+            "type": "string",
+            "allowedValues": [
+                "F1",
+                "S1",
+                "S2"
+            ],
+            "defaultValue": "F1",
+            "metadata": {
+                "description": "Select One of the supported SKUs: F1, S1 or S2"
+            }
+        },
+        "sku_units": {
+            "type": "string",
+            "defaultValue": "1",
+            "metadata": {
+                "description": "specify sku units"
+            }
+        }
+    },
+    "variables": {
+        "location": "westus",
+        "d2c_partitions": "2"
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Devices/IotHubs",
+            "name": "[parameters('name')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "eventHubEndpoints": {
+                    "events": {
+                        "retentionTimeInDays": 1,
+                        "partitionCount": "[variables('d2c_partitions')]"
+                    }
+                }
+            },
+            "sku": {
+                "name": "[parameters('sku_name')]",
+                "capacity": "[parameters('sku_units')]"
+            }
+        }
+    ],
+    "outputs": {
+        "hubKeys": {
+          "value": "[listKeys(resourceId('Microsoft.Devices/IotHubs', parameters('name')), '2018-04-01')]",
+          "type": "object"
+        }
+      }
+}
